@@ -76,6 +76,9 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                     Err(_) => continue,
                 };
                 if let Some((details, dirty)) = worker.get_aircraft_details(callsign) {
+                    if callsign == "BEL250" {
+                        println!("BEL250 dirty? {} found in details: {:?}", dirty, details);
+                    }
                     if dirty {
                         if let Some(flight_plan) = details.flight_plan {
                             let flight_plan = fsd_interface::FlightPlan::from(flight_plan);

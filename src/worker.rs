@@ -129,13 +129,21 @@ fn worker_thread(receiver: Receiver<WorkerCommand>, metars: Arc<Mutex<HashMap<St
                             };
 
                             let mut details_map = vatsim_data.lock().unwrap();
-                            let mut is_new = true;
+                            //let mut is_new = true;
+
+                            // If we already have the details for this pilot
                             if let Some(existing) = details_map.get_mut(&new.callsign) {
+                                // Set 'dirty' to true
                                 existing.1 = true;
                                 if let (Some(new_fp), Some(existing_fp)) = (&new.flight_plan, &existing.0.flight_plan) {
                                     if existing_fp.revision_id == new_fp.revision_id {
+                                        // Only if there is a new flight plan and an old flight plan and the revision IDs are the same do we set 'dirty' to false
+                                        // So basically we set dirty to true if:
+                                        // - There was no old flight plan but there is a new one
+                                        // - There was an old flight plan but there is no new one
+                                        // - There was an old flight plan and a new one and the new one does not have the same revision ID as the old one
                                         existing.1 = false;
-                                        is_new = false;
+                                        //is_new = false;
                                     }
                                 }
                                 existing.0 = new;
@@ -144,9 +152,9 @@ fn worker_thread(receiver: Receiver<WorkerCommand>, metars: Arc<Mutex<HashMap<St
                                 details_map.insert(new.callsign.clone(), (new, true));
                                 count += 1;
                             }
-                            if is_new { 
-                                new_count += 1;
-                            }
+                            // if is_new { 
+                            //     new_count += 1;
+                            // }
                         };
                         println!("Details of {} aircraft fetched from VATSIM, of which {} were new", count, new_count);
                     },
